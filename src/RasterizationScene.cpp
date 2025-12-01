@@ -18,12 +18,12 @@ void RasterizationScene::OnUnload()
 
 static const int PLANET_COUNT = 9;
 
-static float planetRadius[PLANET_COUNT] =
+static float planetSize[PLANET_COUNT] =
 {
 	2.0f, 0.3f, 0.5f, 0.55f, 0.4f, 1.0f, 0.9f, 0.6f, 0.6f
 };
 
-static Vector3 planetBasePos[PLANET_COUNT] =
+static Vector3 planetPos[PLANET_COUNT] =
 {
 	{0,0,0},
 	{3,0,0},
@@ -41,7 +41,7 @@ static float orbitSpeed[PLANET_COUNT] =
 	0.0f, 1.2f, 0.8f, 1.0f, 1.4f, 0.5f, 0.4f, 0.3f, 0.2f
 };
 
-static float selfRotationSpeed[PLANET_COUNT] =
+static float planetRotationSpeed[PLANET_COUNT] =
 {
 	0.5f, 1.0f, 2.0f, 1.5f, 1.2f, 0.8f, 1.1f, 1.3f, 1.4f
 };
@@ -62,14 +62,14 @@ void RasterizationScene::OnUpdate(float dt)
 
     for (int i = 0; i < PLANET_COUNT; i++)
     {
-        Matrix scale = Scale(planetRadius[i], planetRadius[i], planetRadius[i]);
+        Matrix scale = Scale(planetSize[i], planetSize[i], planetSize[i]);
 
 
-        Matrix selfRot = RotateY(tt * selfRotationSpeed[i]);
+        Matrix selfRot = RotateY(tt * planetRotationSpeed[i]);
 
         Matrix orbitRot = RotateZ(tt * orbitSpeed[i]);
 
-        Matrix translation = Translate(planetBasePos[i]);
+        Matrix translation = Translate(planetPos[i]);
 
         Matrix world = scale * selfRot * translation * orbitRot;
 
