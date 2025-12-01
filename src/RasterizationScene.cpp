@@ -1,4 +1,4 @@
-#include "RasterizationScene.h"
+﻿#include "RasterizationScene.h"
 #include "Rasterization.h"
 #include "ImageUtils.h"
 #include "Window.h"
@@ -16,20 +16,67 @@ void RasterizationScene::OnUnload()
 {
 }
 
+static const int PLANET_COUNT = 9;
+
+static float planetRadius[PLANET_COUNT] =
+{
+	2.0f, 0.3f, 0.5f, 0.55f, 0.4f, 1.0f, 0.9f, 0.6f, 0.6f
+};
+
+static Vector3 planetBasePos[PLANET_COUNT] =
+{
+	{0,0,0},
+	{3,0,0},
+	{5,0,0},
+	{7,0,0},
+	{9,0,0},
+	{12,0,0},
+	{15,0,0},
+	{18,0,0},
+	{21,0,0}
+};
+
+static float orbitSpeed[PLANET_COUNT] =
+{
+	0.0f, 1.2f, 0.8f, 1.0f, 1.4f, 0.5f, 0.4f, 0.3f, 0.2f
+};
+
+static float selfRotationSpeed[PLANET_COUNT] =
+{
+	0.5f, 1.0f, 2.0f, 1.5f, 1.2f, 0.8f, 1.1f, 1.3f, 1.4f
+};
+
 void RasterizationScene::OnUpdate(float dt)
 {
-	float tt = TotalTime();
-	Matrix world = RotateY(100.0f * tt * DEG2RAD) * Translate(0.0f, 0.0f, 8.0f);//5.0f + sinf(tt) * 3.0f);
-	Matrix view = LookAt({ 0.0f, 0.0f, 10.0f }, V3_ZERO, V3_UP);
-	Matrix proj = Perspective(90.0f * DEG2RAD, 1.0f, 0.1f, 100.0f);
-	Matrix mvp = world * view * proj;
-	printf("Helloe");
+    float tt = TotalTime();
 
-	Image* img = &gImageCPU;
-	Mesh mesh = gMeshSphere;
-	ClearColor(img, BLACK);
-	ClearDepth(img, 1.0f); // 0.0f = nearest to camera, 1.0f = furthest to camera
-	DrawMesh(img, gMeshSphere, world, mvp);
+    Image* img = &gImageCPU;
+
+    ClearColor(img, BLACK);
+    ClearDepth(img, 1.0f);
+
+    Mesh sphere = gMeshSphere;
+
+    Matrix view = LookAt({ 0, 10, 25 }, { 0,0,0 }, V3_UP);
+    Matrix proj = Perspective(90 * DEG2RAD, 1.0f, 0.1f, 200.0f);
+
+    for (int i = 0; i < PLANET_COUNT; i++)
+    {
+        Matrix scale = Scale(planetRadius[i], planetRadius[i], planetRadius[i]);
+
+
+        Matrix selfRot = RotateY(tt * selfRotationSpeed[i]);
+
+        Matrix orbitRot = RotateZ(tt * orbitSpeed[i]);
+
+        Matrix translation = Translate(planetBasePos[i]);
+
+        Matrix world = scale * selfRot * translation * orbitRot;
+
+        Matrix mvp = world * view * proj;
+
+        DrawMesh(img, sphere, world, mvp);
+    }
 }
 
 std::vector<Vector3> VerticesFromIndices(std::vector<Vector3> unique_vertices, std::vector<uint16_t> indices)
